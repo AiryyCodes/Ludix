@@ -8,7 +8,7 @@ typedef struct
 {
 } LudixState;
 
-LudixState main_state;
+static LudixState main_state;
 
 void begin_main_loop();
 void end_main_loop();

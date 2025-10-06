@@ -1,0 +1,3 @@
+[submodule "Deps/glad"]
+	path = Deps/glad
+	url = https://github.com/AiryyCodes/glad-cmake.git
