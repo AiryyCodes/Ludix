@@ -6,6 +6,7 @@
 #include "ludix.h"
 #include "renderer.h"
 #include "types.h"
+#include "window.h"
 
 typedef struct
 {
@@ -56,10 +57,39 @@ bool window_is_closing()
     return glfwWindowShouldClose(platform_state.main_handle);
 }
 
+int window_get_width()
+{
+    int width, height;
+    glfwGetWindowSize(platform_state.main_handle, &width, &height);
+    return width;
+}
+
+int window_get_height()
+{
+    int width, height;
+    glfwGetWindowSize(platform_state.main_handle, &width, &height);
+    return height;
+}
+
+int window_get_fb_width()
+{
+    int width, height;
+    glfwGetFramebufferSize(platform_state.main_handle, &width, &height);
+    return width;
+}
+
+int window_get_fb_height()
+{
+    int width, height;
+    glfwGetFramebufferSize(platform_state.main_handle, &width, &height);
+    return height;
+}
+
 void begin_main_loop()
 {
-    glClear(GL_COLOR_BUFFER_BIT);
+    clear(GL_COLOR_BUFFER_BIT);
     clear_color((Color){0, 0, 0, 255});
+    viewport_set(window_get_fb_width(), window_get_fb_height());
 
     glfwPollEvents();
 }
@@ -67,9 +97,4 @@ void begin_main_loop()
 void end_main_loop()
 {
     glfwSwapBuffers(platform_state.main_handle);
-}
-
-void clear_color(Color color)
-{
-    glClearColor(color.r / 255.0f, color.g / 255.0f, color.b / 255.0f, color.a / 255.0f);
 }

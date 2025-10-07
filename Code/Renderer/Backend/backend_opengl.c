@@ -9,6 +9,21 @@
 #include <stdlib.h>
 #include <glad/gl.h>
 
+void clear(int flags)
+{
+    glClear(flags);
+}
+
+void clear_color(Color color)
+{
+    glClearColor(color.r / 255.0f, color.g / 255.0f, color.b / 255.0f, color.a / 255.0f);
+}
+
+void viewport_set(int width, int height)
+{
+    glViewport(0, 0, width, height);
+}
+
 Mesh *mesh_create(const Vertex vertices[], u32 num_vertices)
 {
     Mesh *mesh = malloc(sizeof(Mesh));
@@ -25,6 +40,8 @@ Mesh *mesh_create(const Vertex vertices[], u32 num_vertices)
     glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, num_vertices * sizeof(Vertex), &vertices[0], GL_STATIC_DRAW);
 
+    mesh->vertex_buffer = (void *)(uintptr_t)vbo;
+
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(Vertex), (void *)0);
     glEnableVertexAttribArray(0);
 
@@ -36,6 +53,7 @@ void mesh_destroy(Mesh *mesh)
     if (mesh == NULL)
         return;
 
+    glDeleteBuffers(GL_ARRAY_BUFFER, (u32 *)(uintptr_t *)&mesh->vertex_buffer);
     glDeleteVertexArrays(1, (u32 *)(uintptr_t *)&mesh->handle);
 
     free(mesh);

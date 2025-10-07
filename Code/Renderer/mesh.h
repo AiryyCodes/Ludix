@@ -11,6 +11,7 @@ typedef struct
 typedef struct
 {
     void *handle;
+    void *vertex_buffer;
 
     u32 num_vertices;
 } Mesh;

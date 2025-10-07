@@ -2,8 +2,8 @@
 
 #include "Renderer/mesh.h"
 #include "Renderer/shader.h"
+#include "ecs.h"
 #include "ludix.h"
-#include "renderer.h"
 
 const Vertex TRIANGLE_VERTICES[] = {
     {
@@ -25,13 +25,18 @@ int main()
 
     Mesh *triangle_mesh = mesh_create(TRIANGLE_VERTICES, 3);
 
+    ludix_init();
+
+    Entity entity1 = ecs_create_entity();
+    ECS_ADD_COMPONENT(entity1, MeshRenderer, {triangle_mesh});
+
     while (!window_is_closing())
     {
         begin_main_loop();
 
         shader_begin(shader);
 
-        mesh_draw(triangle_mesh);
+        ecs_tick(0);
 
         shader_end();
 
@@ -40,6 +45,8 @@ int main()
 
     mesh_destroy(triangle_mesh);
     shader_destroy(shader);
+
+    ecs_destroy();
 
     return EXIT_SUCCESS;
 }

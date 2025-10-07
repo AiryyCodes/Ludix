@@ -11,6 +11,9 @@ target_link_libraries(ludix PRIVATE glfw)
 add_subdirectory("Deps/glad")
 target_link_libraries(ludix PRIVATE glad)
 
+add_subdirectory("Deps/flecs")
+target_link_libraries(ludix PUBLIC flecs::flecs_static)
+
 if (${BUILD_EXAMPLES})
   message(STATUS "Building examples...")
   add_subdirectory("Examples")

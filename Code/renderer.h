@@ -10,7 +10,7 @@ typedef struct
 
 static RendererState renderer_state;
 
+void clear(int flags);
 void clear_color(Color color);
 
-void shader_begin(Shader *shader);
-void shader_end();
+void viewport_set(int width, int height);
