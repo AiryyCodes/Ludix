@@ -14,3 +14,8 @@ void ludix_init()
     ECS_DEFINE_COMPONENT(main_state.world, MeshRenderer);
     ECS_SYSTEM(main_state.world, rendering_system, EcsOnUpdate, MeshRenderer);
 }
+
+float get_delta_time()
+{
+    return main_state.time.delta;
+}

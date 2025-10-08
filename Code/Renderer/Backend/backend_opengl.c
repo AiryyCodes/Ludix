@@ -152,3 +152,50 @@ void shader_end()
     glUseProgram(0);
     renderer_state.active_shader = NULL;
 }
+
+void shader_set_uniform(const char *name, UniformType type, const void *value)
+{
+    int loc = glGetUniformLocation((u32)(uintptr_t)renderer_state.active_shader->handle, name);
+    if (loc == -1)
+    {
+        LOG("Warning: uniform '%s' not found.\n", name);
+        return;
+    }
+
+    switch (type)
+    {
+    case UNIFORM_FLOAT:
+        glUniform1f(loc, *(float *)value);
+        break;
+    case UNIFORM_VEC2:
+        glUniform2fv(loc, 1, (const float *)value);
+        break;
+    case UNIFORM_VEC3:
+        glUniform3fv(loc, 1, (const float *)value);
+        break;
+    case UNIFORM_VEC4:
+        glUniform4fv(loc, 1, (const float *)value);
+        break;
+    case UNIFORM_INT:
+        glUniform1i(loc, *(int *)value);
+        break;
+    case UNIFORM_IVEC2:
+        glUniform2iv(loc, 1, (const int *)value);
+        break;
+    case UNIFORM_IVEC3:
+        glUniform3iv(loc, 1, (const int *)value);
+        break;
+    case UNIFORM_IVEC4:
+        glUniform4iv(loc, 1, (const int *)value);
+        break;
+    case UNIFORM_MAT3:
+        glUniformMatrix3fv(loc, 1, GL_FALSE, (const float *)value);
+        break;
+    case UNIFORM_MAT4:
+        glUniformMatrix4fv(loc, 1, GL_FALSE, (const float *)value);
+        break;
+    default:
+        LOG("Error: Unknown uniform type for '%s'\n", name);
+        break;
+    }
+}

@@ -8,9 +8,17 @@
 typedef struct
 {
     ECSWorld *world;
+
+    struct
+    {
+        float delta;
+        float last;
+    } time;
 } LudixState;
 
 void ludix_init();
 
 void begin_main_loop();
 void end_main_loop();
+
+float get_delta_time();
