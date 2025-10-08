@@ -2,6 +2,7 @@
 #include <GLFW/glfw3.h>
 #include <stdlib.h>
 
+#include "Math/vector.h"
 #include "input.h"
 #include "log.h"
 #include "ludix.h"
@@ -14,18 +15,37 @@ extern LudixState main_state;
 Key convert_glfw_key(int glfw_key);
 void key_callback(Key key, bool pressed);
 
+Button convert_glfw_button(int glfw_button);
+void button_callback(Button button, bool pressed);
+
 typedef struct
 {
     GLFWwindow *main_handle;
+
+    struct
+    {
+        bool key_down[KEY_COUNT];
+        bool key_pressed[KEY_COUNT];
+
+        bool button_down[KEY_COUNT];
+        bool button_pressed[KEY_COUNT];
+
+        fvec2 mouse_pos;
+
+        float scroll_x;
+        float scroll_y;
+
+        float scroll_accum_x;
+        float scroll_accum_y;
+    } input;
 } PlatformState;
 
 static PlatformState platform_state = {0};
 
-void glfw_key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
-{
-    Key myKey = convert_glfw_key(key); // You can write a small mapping function
-    key_callback(myKey, action != GLFW_RELEASE);
-}
+void glfw_key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
+void glfw_button_callback(GLFWwindow *window, int button, int action, int mods);
+void glfw_mouse_pos_callback(GLFWwindow *window, double xpos, double ypos);
+void glfw_scroll_callback(GLFWwindow *window, double xoffset, double yoffset);
 
 void platform_init()
 {
@@ -53,6 +73,9 @@ void window_init(const char *title, int width, int height)
     }
 
     glfwSetKeyCallback(platform_state.main_handle, glfw_key_callback);
+    glfwSetMouseButtonCallback(platform_state.main_handle, glfw_button_callback);
+    glfwSetCursorPosCallback(platform_state.main_handle, glfw_mouse_pos_callback);
+    glfwSetScrollCallback(platform_state.main_handle, glfw_scroll_callback);
 
     glfwMakeContextCurrent(platform_state.main_handle);
 
@@ -119,12 +142,15 @@ void end_main_loop()
     glfwSwapBuffers(platform_state.main_handle);
 }
 
-static bool key_down[KEY_COUNT] = {false};
-static bool key_pressed[KEY_COUNT] = {false};
-
 void input_reset()
 {
-    memset(key_pressed, 0, sizeof(key_pressed));
+    memset(platform_state.input.key_pressed, 0, sizeof(platform_state.input.key_pressed));
+
+    platform_state.input.scroll_x = platform_state.input.scroll_accum_x;
+    platform_state.input.scroll_y = platform_state.input.scroll_accum_y;
+
+    platform_state.input.scroll_accum_x = 0.0f;
+    platform_state.input.scroll_accum_y = 0.0f;
 }
 
 void key_callback(Key key, bool pressed)
@@ -134,13 +160,30 @@ void key_callback(Key key, bool pressed)
 
     if (pressed)
     {
-        if (!key_down[key])
-            key_pressed[key] = true;
-        key_down[key] = true;
+        if (!platform_state.input.key_down[key])
+            platform_state.input.key_pressed[key] = true;
+        platform_state.input.key_down[key] = true;
     }
     else
     {
-        key_down[key] = false;
+        platform_state.input.key_down[key] = false;
+    }
+}
+
+void button_callback(Button button, bool pressed)
+{
+    if (button < 0 || button >= BUTTON_COUNT)
+        return;
+
+    if (pressed)
+    {
+        if (!platform_state.input.button_down[button])
+            platform_state.input.button_pressed[button] = true;
+        platform_state.input.button_down[button] = true;
+    }
+    else
+    {
+        platform_state.input.button_down[button] = false;
     }
 }
 
@@ -148,14 +191,61 @@ bool is_key_pressed(Key key)
 {
     if (key < 0 || key >= KEY_COUNT)
         return false;
-    return key_pressed[key];
+    return platform_state.input.key_pressed[key];
 }
 
 bool is_key_down(Key key)
 {
     if (key < 0 || key >= KEY_COUNT)
         return false;
-    return key_down[key];
+    return platform_state.input.key_down[key];
+}
+
+bool is_button_down(Button button)
+{
+    if (button < 0 || button >= BUTTON_COUNT)
+        return false;
+
+    return platform_state.input.button_down[button];
+}
+
+fvec2 get_mouse_position()
+{
+    return platform_state.input.mouse_pos;
+}
+
+float get_scroll_x()
+{
+    return platform_state.input.scroll_x;
+}
+
+float get_scroll_y()
+{
+    return platform_state.input.scroll_y;
+}
+
+void glfw_key_callback(GLFWwindow *window, int key, int scancode, int action, int mods)
+{
+    Key my_key = convert_glfw_key(key);
+    key_callback(my_key, action != GLFW_RELEASE);
+}
+
+void glfw_button_callback(GLFWwindow *window, int button, int action, int mods)
+{
+    Button my_button = convert_glfw_button(button);
+    button_callback(my_button, action != GLFW_RELEASE);
+}
+
+void glfw_mouse_pos_callback(GLFWwindow *window, double xpos, double ypos)
+{
+    platform_state.input.mouse_pos.x = (float)xpos;
+    platform_state.input.mouse_pos.y = (float)ypos;
+}
+
+void glfw_scroll_callback(GLFWwindow *window, double xoffset, double yoffset)
+{
+    platform_state.input.scroll_accum_x = (float)xoffset;
+    platform_state.input.scroll_accum_y = (float)yoffset;
 }
 
 Key convert_glfw_key(int glfw_key)
@@ -390,5 +480,16 @@ Key convert_glfw_key(int glfw_key)
 
     default:
         return KEY_UNKNOWN;
+    }
+}
+
+Button convert_glfw_button(int glfw_button)
+{
+    switch (glfw_button)
+    {
+    case GLFW_MOUSE_BUTTON_1:
+        return BUTTON_LEFT;
+    default:
+        return BUTTON_UNKNOWN;
     }
 }

@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Math/vector.h"
+#include "types.h"
+
 typedef enum
 {
     // Letters
@@ -128,7 +131,23 @@ typedef enum
     KEY_COUNT
 } Key;
 
+typedef enum
+{
+    BUTTON_LEFT,
+
+    BUTTON_UNKNOWN,
+    BUTTON_COUNT
+} Button;
+
 void input_reset();
 
 bool is_key_pressed(Key key);
 bool is_key_down(Key key);
+
+bool is_button_pressed(Button button);
+bool is_button_down(Button button);
+
+fvec2 get_mouse_position();
+
+float get_scroll_x();
+float get_scroll_y();
