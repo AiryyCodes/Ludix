@@ -1,0 +1,4 @@
+set(PLATFORM "Desktop" CACHE STRING "Platform to build for.")
+set_property(CACHE PLATFORM PROPERTY STRINGS
+    Desktop
+)
